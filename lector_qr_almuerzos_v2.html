@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Escáner QR - Control de Almuerzos</title>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f5f5f5; }
+    h1 { font-size: 22px; margin-bottom: 20px; }
+    #reader { width: 100%; max-width: 400px; margin: auto; }
+    .info { margin-top: 20px; color: #555; }
+    .error { color: red; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Escanea tu código QR</h1>
+  <div id="reader"></div>
+  <div class="info">Apunta la cámara al código QR para registrar tu almuerzo</div>
+  <div class="error" id="error-message"></div>
+
+  <script>
+    const errorDiv = document.getElementById("error-message");
+
+    function onScanSuccess(decodedText, decodedResult) {
+      if(decodedText.startsWith("http")) {
+        window.location.href = decodedText;
+      }
+    }
+
+    function onScanFailure(error) {
+      // Silenciar errores repetitivos
+    }
+
+    const html5QrCode = new Html5Qrcode("reader");
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+    Html5Qrcode.getCameras().then(devices => {
+      if (devices && devices.length) {
+        let cameraId = devices[0].id;
+        html5QrCode.start(
+          cameraId,
+          config,
+          onScanSuccess,
+          onScanFailure
+        );
+      } else {
+        errorDiv.textContent = "No se encontró ninguna cámara en este dispositivo.";
+      }
+    }).catch(err => {
+      errorDiv.textContent = "Error al acceder a la cámara: " + err;
+    });
+  </script>
+</body>
+</html>
